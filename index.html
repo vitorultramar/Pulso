@@ -227,6 +227,7 @@ input, textarea { font-family: var(--font); }
         <button class="view-tab" onclick="setView('tasks')">Tarefas</button>
       </div>
       <button class="icon-btn desktop-only" onclick="openModal()" title="Novo evento">＋</button>
+      <button class="icon-btn desktop-only" id="gcal-btn" onclick="connectGoogleCalendar()" title="Conectar Google Calendar" style="font-size:11px;width:auto;padding:0 10px;color:var(--text2)">📅 Conectar Google</button>
       <button class="icon-btn" id="notif-btn" title="Notificações" onclick="requestNotifPermission()">🔔</button>
     </div>
   </div>
@@ -692,6 +693,95 @@ function scheduleNotification(title, dt) {
   setTimeout(()=> new Notification('Pulso — lembrete', { body: `${title} em 15 minutos`, icon: '' }), delta);
 }
 
+// ── Google Calendar Integration ────────────────────────
+const GCAL_CLIENT_ID = '624790441226-ha64oeqgjek0c0kr4manp2vv1l3ug3gb.apps.googleusercontent.com';
+const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+let gcalToken = localStorage.getItem('pulso_gcal_token') || null;
+let gcalConnected = false;
+
+function renderGcalButton() {
+  const btn = document.getElementById('gcal-btn');
+  if (!btn) return;
+  if (gcalConnected) {
+    btn.textContent = '📅 Google Calendar ✓';
+    btn.style.color = 'var(--personal)';
+  } else {
+    btn.textContent = '📅 Conectar Google';
+    btn.style.color = 'var(--text2)';
+  }
+}
+
+function connectGoogleCalendar() {
+  const params = new URLSearchParams({
+    client_id: GCAL_CLIENT_ID,
+    redirect_uri: window.location.origin + window.location.pathname,
+    response_type: 'token',
+    scope: GCAL_SCOPE,
+    prompt: 'consent',
+  });
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+
+function handleOAuthCallback() {
+  const hash = window.location.hash;
+  if (!hash.includes('access_token')) return;
+  const params = new URLSearchParams(hash.slice(1));
+  const token = params.get('access_token');
+  if (token) {
+    gcalToken = token;
+    localStorage.setItem('pulso_gcal_token', token);
+    window.history.replaceState({}, '', window.location.pathname);
+    showToast('Google Calendar conectado ✓');
+    fetchGoogleCalendarEvents();
+  }
+}
+
+async function fetchGoogleCalendarEvents() {
+  if (!gcalToken) return;
+  const now = new Date();
+  const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const end = new Date(now.getFullYear(), now.getMonth() + 2, 0).toISOString();
+  try {
+    const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${start}&timeMax=${end}&singleEvents=true&orderBy=startTime&maxResults=100`, {
+      headers: { Authorization: `Bearer ${gcalToken}` }
+    });
+    if (res.status === 401) {
+      gcalToken = null;
+      localStorage.removeItem('pulso_gcal_token');
+      gcalConnected = false;
+      renderGcalButton();
+      showToast('Sessão expirada — reconecte o Google');
+      return;
+    }
+    const data = await res.json();
+    gcalConnected = true;
+    renderGcalButton();
+    const gcalEvents = (data.items || []).filter(e => e.start).map(e => {
+      const isAllDay = !!e.start.date;
+      const dt = isAllDay ? new Date(e.start.date + 'T08:00:00') : new Date(e.start.dateTime);
+      // Check if event already exists (by gcal id)
+      if (events.find(x => x.gcalId === e.id)) return null;
+      return {
+        id: Math.random().toString(36).slice(2),
+        gcalId: e.id,
+        title: e.summary || '(sem título)',
+        meta: e.location || e.hangoutLink ? (e.location || 'Google Meet') : '',
+        context: 'work',
+        date: dt,
+        duration: isAllDay ? 60 : Math.round(((new Date(e.end.dateTime||e.end.date)) - dt) / 60000),
+        fromGcal: true
+      };
+    }).filter(Boolean);
+    events = [...events.filter(e => !e.fromGcal), ...gcalEvents];
+    saveData();
+    render();
+    showToast(`${gcalEvents.length} eventos importados do Google`);
+  } catch(err) {
+    showToast('Erro ao buscar eventos do Google');
+    console.error(err);
+  }
+}
+
 // ── PWA manifest ───────────────────────────────────────
 const manifest = {
   name: 'Pulso', short_name: 'Pulso',
@@ -721,6 +811,9 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 });
 
 // ── Init ───────────────────────────────────────────────
+handleOAuthCallback();
+if (gcalToken) fetchGoogleCalendarEvents();
+renderGcalButton();
 render();
 </script>
 </body>
