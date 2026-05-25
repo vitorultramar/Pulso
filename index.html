@@ -209,6 +209,7 @@ input, textarea { font-family: var(--font); }
 /* ── Transitions ── */
 .event-card, .mode-btn, #logo, #briefing, #briefing-icon, #briefing-text .b-title { transition-duration: .35s; }
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer onload="initGoogleIdentity()"></script>
 </head>
 <body>
 
@@ -698,6 +699,21 @@ const GCAL_CLIENT_ID = '624790441226-diakocge2dg3mmrgoqisqvusc5qc2930.apps.googl
 const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 let gcalToken = localStorage.getItem('pulso_gcal_token') || null;
 let gcalConnected = false;
+let tokenClient = null;
+
+function initGoogleIdentity() {
+  if (!window.google) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GCAL_CLIENT_ID,
+    scope: GCAL_SCOPE,
+    callback: (resp) => {
+      if (resp.error) { showToast('Erro ao conectar Google'); return; }
+      gcalToken = resp.access_token;
+      localStorage.setItem('pulso_gcal_token', gcalToken);
+      fetchGoogleCalendarEvents();
+    },
+  });
+}
 
 function renderGcalButton() {
   const btn = document.getElementById('gcal-btn');
@@ -712,28 +728,16 @@ function renderGcalButton() {
 }
 
 function connectGoogleCalendar() {
-  const params = new URLSearchParams({
-    client_id: GCAL_CLIENT_ID,
-    redirect_uri: window.location.origin + window.location.pathname,
-    response_type: 'token',
-    scope: GCAL_SCOPE,
-    prompt: 'consent',
-  });
-  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+  if (!tokenClient) { showToast('Aguarde, carregando...'); return; }
+  if (gcalToken) {
+    fetchGoogleCalendarEvents();
+  } else {
+    tokenClient.requestAccessToken({ prompt: 'consent' });
+  }
 }
 
 function handleOAuthCallback() {
-  const hash = window.location.hash;
-  if (!hash.includes('access_token')) return;
-  const params = new URLSearchParams(hash.slice(1));
-  const token = params.get('access_token');
-  if (token) {
-    gcalToken = token;
-    localStorage.setItem('pulso_gcal_token', token);
-    window.history.replaceState({}, '', window.location.pathname);
-    showToast('Google Calendar conectado ✓');
-    fetchGoogleCalendarEvents();
-  }
+  // kept for compatibility
 }
 
 async function fetchGoogleCalendarEvents() {
@@ -811,9 +815,8 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 });
 
 // ── Init ───────────────────────────────────────────────
-handleOAuthCallback();
-if (gcalToken) fetchGoogleCalendarEvents();
 renderGcalButton();
+if (gcalToken) fetchGoogleCalendarEvents();
 render();
 </script>
 </body>
