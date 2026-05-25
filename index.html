@@ -206,6 +206,102 @@ input, textarea { font-family: var(--font); }
   #toast { bottom: 90px; }
 }
 
+
+/* ── Mobile redesign ── */
+#mobile-home { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+#mobile-cal-view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+
+.mb-topbar { padding: 14px 18px 8px; display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0; }
+.mb-greeting { font-size: 11px; color: var(--text2); margin-bottom: 1px; }
+.mb-date { font-size: 17px; font-weight: 500; color: var(--text); letter-spacing: -.02em; }
+.mb-toggle { display: flex; background: var(--surface2); border-radius: 14px; padding: 2px; gap: 1px; margin-top: 2px; }
+.mb-mode { font-size: 10px; font-weight: 500; padding: 4px 10px; border-radius: 11px; color: var(--text2); transition: all .3s; border: none; background: none; cursor: pointer; }
+.mb-mode.active { background: var(--accent); color: #fff; }
+
+.mb-briefing { margin: 6px 18px 10px; background: var(--accent-dim); border-radius: 12px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(124,111,224,0.15); flex-shrink: 0; transition: background .4s, border-color .4s; }
+[data-mode="personal"] .mb-briefing { border-color: rgba(34,169,122,0.15); }
+.mb-b-icon { font-size: 14px; color: var(--accent); }
+.mb-b-title { font-size: 11px; font-weight: 500; color: var(--accent-text); margin-bottom: 1px; transition: color .4s; }
+.mb-b-sub { font-size: 10px; color: var(--text2); }
+
+.mb-scroll { flex: 1; overflow-y: auto; padding: 0 18px 20px; }
+.mb-scroll::-webkit-scrollbar { display: none; }
+
+.mb-section-label { font-size: 10px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); margin: 12px 0 8px; }
+
+.mb-card-big { border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; cursor: pointer; }
+.mb-card-big.work { background: var(--work-dim); border-left: 3px solid var(--work); }
+.mb-card-big.personal { background: var(--personal-dim); border-left: 3px solid var(--personal); }
+.mb-card-big .ctx-label { font-size: 9px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; margin-bottom: 5px; }
+.mb-card-big.work .ctx-label { color: var(--work); }
+.mb-card-big.personal .ctx-label { color: var(--personal); }
+.mb-card-big .ev-name { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+.mb-card-big .ev-footer { display: flex; align-items: center; justify-content: space-between; }
+.mb-card-big .ev-time-txt { font-size: 11px; color: var(--text2); font-family: var(--mono); }
+.mb-card-big .ev-pill { font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 8px; }
+.mb-card-big.work .ev-pill { background: var(--work-dim); color: var(--work-text); border: 1px solid rgba(124,111,224,0.3); }
+.mb-card-big.personal .ev-pill { background: var(--personal-dim); color: var(--personal-text); border: 1px solid rgba(34,169,122,0.3); }
+.mb-card-big.dimmed { opacity: .3; }
+
+.mb-card-small { border-radius: 10px; padding: 10px 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.mb-card-small.work { background: var(--work-dim); border-left: 2.5px solid var(--work); }
+.mb-card-small.personal { background: var(--personal-dim); border-left: 2.5px solid var(--personal); }
+.mb-card-small.dimmed { opacity: .3; }
+.mb-card-small .cs-body { flex: 1; }
+.mb-card-small .cs-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.mb-card-small.work .cs-name { color: var(--work-text); }
+.mb-card-small.personal .cs-name { color: var(--personal-text); }
+.mb-card-small .cs-meta { font-size: 10px; color: var(--text2); margin-top: 2px; }
+.mb-card-small .cs-countdown { font-size: 10px; font-weight: 500; font-family: var(--mono); }
+.mb-card-small.work .cs-countdown { color: var(--work-text); }
+.mb-card-small.personal .cs-countdown { color: var(--personal-text); }
+
+.mb-empty { text-align: center; padding: 30px 0; color: var(--text3); font-size: 13px; }
+
+/* swipe hint */
+.mb-swipe-hint { text-align: center; font-size: 10px; color: var(--text3); padding: 4px 0 8px; letter-spacing: .04em; flex-shrink: 0; }
+
+/* Mobile calendar view */
+.mb-cal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 8px; flex-shrink: 0; }
+.mb-cal-month { font-size: 16px; font-weight: 500; color: var(--text); }
+.mb-cal-nav { display: flex; gap: 8px; }
+.mb-cal-nav button { width: 28px; height: 28px; border-radius: 6px; color: var(--text3); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+.mb-cal-nav button:hover { background: var(--surface2); color: var(--text); }
+
+.mb-cal-weekdays { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px; margin-bottom: 4px; flex-shrink: 0; }
+.mb-cal-wd { font-size: 10px; color: var(--text3); text-align: center; padding: 4px 0; }
+
+.mb-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px; gap: 3px; flex-shrink: 0; }
+.mb-cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 12px; color: var(--text2); cursor: pointer; position: relative; transition: background .15s; flex-direction: column; gap: 2px; }
+.mb-cal-cell:hover { background: var(--surface2); }
+.mb-cal-cell.today { background: var(--accent); color: #fff; font-weight: 500; }
+.mb-cal-cell.selected:not(.today) { border: 1px solid var(--accent); color: var(--accent-text); }
+.mb-cal-cell.other-month { color: var(--text3); }
+.mb-cal-cell .cell-dots { display: flex; gap: 2px; }
+.mb-cal-cell .cell-dot { width: 4px; height: 4px; border-radius: 50%; }
+.mb-cal-cell .dot-w { background: var(--work); }
+.mb-cal-cell .dot-p { background: var(--personal); }
+.mb-cal-cell.today .cell-dot { background: rgba(255,255,255,0.7); }
+
+.mb-day-expand { flex: 1; overflow-y: auto; padding: 12px 18px 20px; }
+.mb-day-expand::-webkit-scrollbar { display: none; }
+.mb-day-expand-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.mb-day-expand-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.mb-day-expand-close { font-size: 18px; color: var(--text3); cursor: pointer; padding: 2px 6px; }
+
+.mb-cal-legend { display: flex; gap: 14px; padding: 8px 18px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.mb-leg { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text3); }
+.mb-leg-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+@media (max-width: 640px) {
+  #day-view, #week-view, #tasks-view { display: none !important; }
+  #briefing { display: none !important; }
+  #day-header { display: none !important; }
+  #mobile-home { display: flex; }
+  #topbar { display: none; }
+  #bottom-nav { display: block; }
+}
+
 /* ── Transitions ── */
 .event-card, .mode-btn, #logo, #briefing, #briefing-icon, #briefing-text .b-title { transition-duration: .35s; }
 </style>
@@ -286,18 +382,70 @@ input, textarea { font-family: var(--font); }
 
   </div>
 
+
+  <!-- Mobile home view -->
+  <div id="mobile-home">
+    <div class="mb-topbar">
+      <div>
+        <div class="mb-greeting" id="mb-greeting">bom dia</div>
+        <div class="mb-date" id="mb-date">carregando...</div>
+      </div>
+      <div class="mb-toggle">
+        <button class="mb-mode active" onclick="setMode('work')">Trabalho</button>
+        <button class="mb-mode" onclick="setMode('personal')">Pessoal</button>
+      </div>
+    </div>
+
+    <div class="mb-briefing">
+      <div class="mb-b-icon" id="mb-b-icon">☀</div>
+      <div>
+        <div class="mb-b-title" id="mb-b-title">resumo de hoje</div>
+        <div class="mb-b-sub" id="mb-b-sub">carregando...</div>
+      </div>
+    </div>
+
+    <div class="mb-scroll" id="mb-scroll">
+      <div id="mb-events-container"></div>
+    </div>
+
+    <div class="mb-swipe-hint" id="mb-swipe-hint">← deslize para ver o mês</div>
+  </div>
+
+  <!-- Mobile calendar view -->
+  <div id="mobile-cal-view">
+    <div class="mb-cal-header">
+      <div class="mb-cal-month" id="mb-cal-month">maio 2026</div>
+      <div class="mb-cal-nav">
+        <button onclick="mbCalChangeMonth(-1)">‹</button>
+        <button onclick="mbCalChangeMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="mb-cal-weekdays">
+      <div class="mb-cal-wd">D</div><div class="mb-cal-wd">S</div><div class="mb-cal-wd">T</div>
+      <div class="mb-cal-wd">Q</div><div class="mb-cal-wd">Q</div><div class="mb-cal-wd">S</div><div class="mb-cal-wd">S</div>
+    </div>
+    <div class="mb-cal-grid" id="mb-cal-grid"></div>
+    <div class="mb-cal-legend">
+      <div class="mb-leg"><div class="mb-leg-dot dot-w"></div>trabalho</div>
+      <div class="mb-leg"><div class="mb-leg-dot dot-p"></div>pessoal</div>
+    </div>
+    <div class="mb-day-expand" id="mb-day-expand">
+      <div class="mb-empty" style="color:var(--text3);font-size:12px;padding-top:20px">toque em um dia para ver os eventos</div>
+    </div>
+  </div>
+
   <div id="bottom-nav">
     <div class="bnav-items">
-      <div class="bnav-item active" onclick="setView('day');setActiveBnav(0)">
-        <span class="bnav-icon">📅</span>dia
+      <div class="bnav-item active" id="bnav-0" onclick="mbSetView('home');setActiveBnav(0)">
+        <span class="bnav-icon">📅</span>hoje
       </div>
-      <div class="bnav-item" onclick="setView('week');setActiveBnav(1)">
-        <span class="bnav-icon">📆</span>semana
+      <div class="bnav-item" id="bnav-1" onclick="mbSetView('cal');setActiveBnav(1)">
+        <span class="bnav-icon">📆</span>mês
       </div>
-      <div class="bnav-item" onclick="setView('tasks');setActiveBnav(2)">
+      <div class="bnav-item" id="bnav-2" onclick="setView('tasks');mbSetView('tasks');setActiveBnav(2)">
         <span class="bnav-icon">✓</span>tarefas
       </div>
-      <div class="bnav-item" onclick="openModal();setActiveBnav(3)">
+      <div class="bnav-item" id="bnav-3" onclick="openModal()">
         <span class="bnav-icon">＋</span>novo
       </div>
     </div>
@@ -651,6 +799,10 @@ function render() {
   if (currentView==='day') renderDayView();
   else if (currentView==='week') renderWeekView();
   else renderTasksView();
+  if (isMobile()) {
+    if (mbView==='home') renderMobileHome();
+    else if (mbView==='cal') renderMobileCal();
+  }
 }
 
 // ── Modal ──────────────────────────────────────────────
@@ -760,6 +912,234 @@ function checkPendingNotifications() {
   });
   localStorage.setItem('pulso_scheduled', JSON.stringify(remaining));
 }
+
+
+// ── Mobile redesign JS ─────────────────────────────────
+const isMobile = () => window.innerWidth <= 640;
+let mbView = 'home'; // 'home' | 'cal' | 'tasks'
+let mbCalDate = new Date(today.getFullYear(), today.getMonth(), 1);
+let mbExpandedDay = null;
+
+function mbSetView(v) {
+  if (!isMobile()) return;
+  mbView = v;
+  document.getElementById('mobile-home').style.display = v==='home' ? 'flex' : 'none';
+  document.getElementById('mobile-cal-view').style.display = v==='cal' ? 'flex' : 'none';
+  // tasks view uses existing desktop tasks view, make it visible on mobile too
+  const tv = document.getElementById('tasks-view');
+  if (v==='tasks') { tv.style.display = 'block'; tv.style.overflow = 'auto'; tv.style.flex = '1'; }
+  else tv.style.display = 'none';
+  if (v==='home') renderMobileHome();
+  if (v==='cal') renderMobileCal();
+  if (v==='tasks') renderTasksView();
+}
+
+function timeCountdown(dt) {
+  const diff = dt - Date.now();
+  if (diff < 0) return 'agora';
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `em ${mins}min`;
+  const hrs = Math.floor(mins / 60);
+  const rem = mins % 60;
+  if (rem === 0) return `em ${hrs}h`;
+  return `em ${hrs}h${rem}min`;
+}
+
+function renderMobileHome() {
+  if (!isMobile()) return;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'bom dia' : hour < 18 ? 'boa tarde' : 'boa noite';
+  document.getElementById('mb-greeting').textContent = greeting;
+  document.getElementById('mb-date').textContent =
+    `${DAY_NAMES[today.getDay()]}, ${today.getDate()} de ${MONTH_NAMES[today.getMonth()]}`;
+
+  // Briefing
+  const todayEvs = eventsForDay(today).filter(e => e.date >= new Date(today) || sameDay(e.date, today));
+  const upcoming = todayEvs.filter(e => e.date > new Date()).sort((a,b)=>a.date-b.date);
+  const workCount = todayEvs.filter(e=>e.context==='work').length;
+  const persCount = todayEvs.filter(e=>e.context==='personal').length;
+  let bSub = [];
+  if (workCount) bSub.push(`${workCount} trabalho`);
+  if (persCount) bSub.push(`${persCount} pessoal`);
+  if (!bSub.length) bSub.push('nenhum compromisso hoje');
+  document.getElementById('mb-b-title').textContent = `${todayEvs.length} compromisso${todayEvs.length!==1?'s':''} hoje`;
+  document.getElementById('mb-b-sub').textContent = upcoming.length
+    ? `próximo: ${upcoming[0].title} ${timeCountdown(upcoming[0].date)}`
+    : bSub.join(' · ');
+
+  // Events
+  const container = document.getElementById('mb-events-container');
+  container.innerHTML = '';
+
+  const allEvs = eventsForDay(today).sort((a,b)=>a.date-b.date);
+  const next = allEvs.find(e => e.date > new Date());
+  const rest = allEvs.filter(e => e !== next);
+
+  if (!allEvs.length) {
+    container.innerHTML = '<div class="mb-empty">🎉 Dia livre!</div>';
+    return;
+  }
+
+  // Next event — big card
+  if (next) {
+    const isDimmed = (mode==='work'&&next.context==='personal')||(mode==='personal'&&next.context==='work');
+    const div = document.createElement('div');
+    div.className = `mb-card-big ${next.context}${isDimmed?' dimmed':''}`;
+    div.innerHTML = `
+      <div class="ctx-label">${next.context==='work'?'trabalho':'pessoal'}</div>
+      <div class="ev-name">${next.title}</div>
+      <div class="ev-footer">
+        <div class="ev-time-txt">${fmtTime(next.date)} · ${next.duration}min</div>
+        <div class="ev-pill">${timeCountdown(next.date)}</div>
+      </div>`;
+    const label = document.createElement('div');
+    label.className = 'mb-section-label';
+    label.textContent = 'próximo';
+    container.appendChild(label);
+    container.appendChild(div);
+  }
+
+  // Rest — small cards
+  if (rest.length) {
+    const label = document.createElement('div');
+    label.className = 'mb-section-label';
+    label.textContent = next ? 'mais tarde' : 'hoje';
+    container.appendChild(label);
+    rest.forEach(ev => {
+      const isDimmed = (mode==='work'&&ev.context==='personal')||(mode==='personal'&&ev.context==='work');
+      const div = document.createElement('div');
+      div.className = `mb-card-small ${ev.context}${isDimmed?' dimmed':''}`;
+      div.innerHTML = `
+        <div class="cs-body">
+          <div class="cs-name">${ev.title}</div>
+          <div class="cs-meta">${fmtTime(ev.date)}${ev.meta?' · '+ev.meta:''}</div>
+        </div>
+        <div class="cs-countdown">${timeCountdown(ev.date)}</div>`;
+      container.appendChild(div);
+    });
+  }
+}
+
+function renderMobileCal() {
+  if (!isMobile()) return;
+  const y = mbCalDate.getFullYear(), m = mbCalDate.getMonth();
+  document.getElementById('mb-cal-month').textContent = `${MONTH_NAMES[m]} ${y}`;
+  const first = new Date(y,m,1).getDay();
+  const total = new Date(y,m+1,0).getDate();
+  const grid = document.getElementById('mb-cal-grid');
+  grid.innerHTML = '';
+
+  for (let i=0; i<first; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'mb-cal-cell other-month';
+    grid.appendChild(cell);
+  }
+
+  for (let d=1; d<=total; d++) {
+    const dt = new Date(y,m,d);
+    const dayEvs = eventsForDay(dt);
+    const hasWork = dayEvs.some(e=>e.context==='work');
+    const hasPers = dayEvs.some(e=>e.context==='personal');
+    const isT = sameDay(dt,today);
+    const isSel = mbExpandedDay && sameDay(dt, mbExpandedDay);
+
+    const cell = document.createElement('div');
+    cell.className = `mb-cal-cell${isT?' today':''}${isSel&&!isT?' selected':''}`;
+
+    const num = document.createElement('span');
+    num.textContent = d;
+    cell.appendChild(num);
+
+    if (hasWork || hasPers) {
+      const dots = document.createElement('div');
+      dots.className = 'cell-dots';
+      if (hasWork) { const dot = document.createElement('div'); dot.className = 'cell-dot dot-w'; dots.appendChild(dot); }
+      if (hasPers) { const dot = document.createElement('div'); dot.className = 'cell-dot dot-p'; dots.appendChild(dot); }
+      cell.appendChild(dots);
+    }
+
+    cell.addEventListener('click', () => mbExpandDay(new Date(y,m,d)));
+    grid.appendChild(cell);
+  }
+
+  // Re-render expanded day if set
+  if (mbExpandedDay) mbExpandDay(mbExpandedDay, true);
+}
+
+function mbExpandDay(dt, skipGridRender) {
+  mbExpandedDay = dt;
+  if (!skipGridRender) renderMobileCal();
+
+  const container = document.getElementById('mb-day-expand');
+  const evs = eventsForDay(dt).sort((a,b)=>a.date-b.date);
+  const isT = sameDay(dt, today);
+  const label = `${isT?'Hoje, ':''}${DAY_NAMES[dt.getDay()]}, ${dt.getDate()} de ${MONTH_NAMES[dt.getMonth()]}`;
+
+  container.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'mb-day-expand-header';
+  header.innerHTML = `<div class="mb-day-expand-title">${label}</div><span class="mb-day-expand-close" onclick="mbCollapseDay()">✕</span>`;
+  container.appendChild(header);
+
+  if (!evs.length) {
+    const empty = document.createElement('div');
+    empty.className = 'mb-empty';
+    empty.style.paddingTop = '16px';
+    empty.textContent = 'Nenhum evento';
+    container.appendChild(empty);
+    return;
+  }
+
+  evs.forEach(ev => {
+    const isDimmed = (mode==='work'&&ev.context==='personal')||(mode==='personal'&&ev.context==='work');
+    const div = document.createElement('div');
+    div.className = `mb-card-small ${ev.context}${isDimmed?' dimmed':''}`;
+    div.style.marginBottom = '6px';
+    div.innerHTML = `
+      <div class="cs-body">
+        <div class="cs-name">${ev.title}</div>
+        <div class="cs-meta">${fmtTime(ev.date)}${ev.meta?' · '+ev.meta:''}</div>
+      </div>
+      <div class="cs-countdown">${isT ? timeCountdown(ev.date) : fmtTime(ev.date)}</div>`;
+    container.appendChild(div);
+  });
+}
+
+function mbCollapseDay() {
+  mbExpandedDay = null;
+  document.getElementById('mb-day-expand').innerHTML =
+    '<div class="mb-empty" style="color:var(--text3);font-size:12px;padding-top:20px">toque em um dia para ver os eventos</div>';
+  renderMobileCal();
+}
+
+function mbCalChangeMonth(delta) {
+  mbCalDate = new Date(mbCalDate.getFullYear(), mbCalDate.getMonth() + delta, 1);
+  mbExpandedDay = null;
+  renderMobileCal();
+}
+
+// Swipe detection
+(function() {
+  let startX = 0, startY = 0;
+  const app = document.getElementById('app');
+  app.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive: true});
+  app.addEventListener('touchend', e => {
+    if (!isMobile()) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx)) return; // not a horizontal swipe
+    if (dx < 0 && mbView === 'home') { mbSetView('cal'); setActiveBnav(1); }
+    if (dx > 0 && mbView === 'cal') { mbSetView('home'); setActiveBnav(0); }
+  }, {passive: true});
+})();
+
+// Override setMode to also re-render mobile
+const _origSetMode = setMode;
+// already handled — setMode calls render() which we'll hook
 
 // ── Google Calendar Integration ────────────────────────
 const GCAL_CLIENT_ID = '624790441226-diakocge2dg3mmrgoqisqvusc5qc2930.apps.googleusercontent.com';
@@ -887,6 +1267,7 @@ if (gcalToken) fetchGoogleCalendarEvents();
 registerServiceWorker();
 checkPendingNotifications();
 render();
+if (isMobile()) { mbSetView("home"); setActiveBnav(0); }
 </script>
 </body>
 </html>
