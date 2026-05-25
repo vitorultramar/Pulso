@@ -345,6 +345,17 @@ input, textarea { font-family: var(--font); }
       <label>Notas (opcional)</label>
       <textarea id="ev-notes" rows="2" placeholder="Detalhes, link, local..."></textarea>
     </div>
+    <div class="field">
+      <label>Lembrete</label>
+      <select id="ev-reminder">
+        <option value="0">Sem lembrete</option>
+        <option value="5">5 minutos antes</option>
+        <option value="15" selected>15 minutos antes</option>
+        <option value="30">30 minutos antes</option>
+        <option value="60">1 hora antes</option>
+        <option value="120">2 horas antes</option>
+      </select
+    </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveEvent()">Salvar</button>
@@ -650,6 +661,7 @@ function openModal() {
   document.getElementById('ev-title').value = '';
   document.getElementById('ev-notes').value = '';
   document.getElementById('ev-context').value = mode;
+  document.getElementById('ev-reminder').value = '15';
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal() {
@@ -663,13 +675,14 @@ function saveEvent() {
   const ctx = document.getElementById('ev-context').value;
   const dur = parseInt(document.getElementById('ev-duration').value);
   const notes = document.getElementById('ev-notes').value.trim();
+  const reminder = parseInt(document.getElementById('ev-reminder').value);
   const dt = new Date(dateStr+'T'+timeStr);
-  events.push({ id: Math.random().toString(36).slice(2), title, meta: notes||'', context: ctx, date: dt, duration: dur });
+  events.push({ id: Math.random().toString(36).slice(2), title, meta: notes||'', context: ctx, date: dt, duration: dur, reminder });
   saveData();
   closeModal();
   render();
   showToast('Evento salvo ✓');
-  scheduleNotification(title, dt);
+  scheduleNotification(title, dt, reminder);
 }
 
 // ── Toast ──────────────────────────────────────────────
@@ -681,17 +694,71 @@ function showToast(msg) {
 }
 
 // ── Notifications ──────────────────────────────────────
+let swReg = null;
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  try {
+    swReg = await navigator.serviceWorker.register('/sw.js');
+    console.log('SW registrado');
+  } catch(e) { console.error('SW erro:', e); }
+}
+
 async function requestNotifPermission() {
   if (!('Notification' in window)) { showToast('Notificações não suportadas'); return; }
   const perm = await Notification.requestPermission();
-  if (perm === 'granted') showToast('Notificações ativadas ✓');
-  else showToast('Permissão negada');
+  if (perm === 'granted') {
+    await registerServiceWorker();
+    showToast('Notificações ativadas ✓');
+  } else {
+    showToast('Permissão negada');
+  }
 }
-function scheduleNotification(title, dt) {
+
+function scheduleNotification(title, dt, reminderMinutes) {
+  if (!reminderMinutes || reminderMinutes === 0) return;
   if (Notification.permission !== 'granted') return;
-  const delta = dt.getTime() - Date.now() - 15*60*1000;
+  const fireAt = dt.getTime() - reminderMinutes * 60 * 1000;
+  const delta = fireAt - Date.now();
   if (delta < 0) return;
-  setTimeout(()=> new Notification('Pulso — lembrete', { body: `${title} em 15 minutos`, icon: '' }), delta);
+  // Store scheduled notification
+  const scheduled = JSON.parse(localStorage.getItem('pulso_scheduled') || '[]');
+  const id = Math.random().toString(36).slice(2);
+  scheduled.push({ id, title, fireAt, reminderMinutes });
+  localStorage.setItem('pulso_scheduled', JSON.stringify(scheduled));
+  // Use SW if available, fallback to setTimeout
+  if (swReg && swReg.active) {
+    swReg.active.postMessage({ type: 'SCHEDULE', id, title, fireAt, reminderMinutes });
+  } else {
+    setTimeout(() => {
+      new Notification('Pulso — lembrete', {
+        body: `${title} em ${reminderMinutes < 60 ? reminderMinutes + ' minutos' : reminderMinutes/60 + ' hora(s)'}`,
+        icon: ''
+      });
+    }, delta);
+  }
+}
+
+// Check and fire any pending notifications on load
+function checkPendingNotifications() {
+  if (Notification.permission !== 'granted') return;
+  const scheduled = JSON.parse(localStorage.getItem('pulso_scheduled') || '[]');
+  const now = Date.now();
+  const remaining = scheduled.filter(n => {
+    if (n.fireAt <= now) {
+      new Notification('Pulso — lembrete', {
+        body: `${n.title} — em ${n.reminderMinutes < 60 ? n.reminderMinutes + ' minutos' : n.reminderMinutes/60 + ' hora(s)'}`,
+      });
+      return false;
+    }
+    setTimeout(() => {
+      new Notification('Pulso — lembrete', {
+        body: `${n.title} em ${n.reminderMinutes < 60 ? n.reminderMinutes + ' minutos' : n.reminderMinutes/60 + ' hora(s)'}`,
+      });
+    }, n.fireAt - now);
+    return true;
+  });
+  localStorage.setItem('pulso_scheduled', JSON.stringify(remaining));
 }
 
 // ── Google Calendar Integration ────────────────────────
@@ -817,6 +884,8 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 // ── Init ───────────────────────────────────────────────
 renderGcalButton();
 if (gcalToken) fetchGoogleCalendarEvents();
+registerServiceWorker();
+checkPendingNotifications();
 render();
 </script>
 </body>
