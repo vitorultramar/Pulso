@@ -853,7 +853,40 @@ async function registerServiceWorker() {
   try {
     swReg = await navigator.serviceWorker.register('/sw.js');
     console.log('SW registrado');
+    // Listen for messages from SW
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'TOKEN_EXPIRED') {
+        gcalToken = null;
+        localStorage.removeItem('pulso_gcal_token');
+        gcalConnected = false;
+        renderGcalButton();
+        showToast('Sessão Google expirada — reconecte');
+        swStopPoll();
+      }
+      if (e.data?.type === 'NEW_EVENTS') {
+        fetchGoogleCalendarEvents();
+      }
+    });
+    // Start polling if token already exists
+    if (gcalToken) swStartPoll();
   } catch(e) { console.error('SW erro:', e); }
+}
+
+function swStartPoll() {
+  if (!swReg || !gcalToken) return;
+  const sw = swReg.active || swReg.installing || swReg.waiting;
+  if (sw) sw.postMessage({ type: 'START_POLL', token: gcalToken });
+  else swReg.addEventListener('updatefound', () => {
+    swReg.installing.addEventListener('statechange', function() {
+      if (this.state === 'activated') swStartPoll();
+    });
+  });
+}
+
+function swStopPoll() {
+  if (!swReg) return;
+  const sw = swReg.active;
+  if (sw) sw.postMessage({ type: 'STOP_POLL' });
 }
 
 async function requestNotifPermission() {
@@ -1158,6 +1191,7 @@ function initGoogleIdentity() {
       gcalToken = resp.access_token;
       localStorage.setItem('pulso_gcal_token', gcalToken);
       fetchGoogleCalendarEvents();
+      swStartPoll();
     },
   });
 }
@@ -1223,10 +1257,34 @@ async function fetchGoogleCalendarEvents() {
         fromGcal: true
       };
     }).filter(Boolean);
+    // Detect new events (not previously known)
+    const knownIds = JSON.parse(localStorage.getItem('pulso_known_gcal_ids') || '[]');
+    const brandNew = gcalEvents.filter(e => !knownIds.includes(e.gcalId));
+
+    // Notify for each new event
+    if (brandNew.length && Notification.permission === 'granted') {
+      brandNew.forEach(ev => {
+        new Notification('Pulso — novo compromisso', {
+          body: ev.title,
+          icon: '',
+          tag: ev.gcalId
+        });
+      });
+    }
+
+    // Update known ids
+    const allGcalIds = [...knownIds, ...brandNew.map(e => e.gcalId)];
+    localStorage.setItem('pulso_known_gcal_ids', JSON.stringify(allGcalIds));
+
     events = [...events.filter(e => !e.fromGcal), ...gcalEvents];
     saveData();
     render();
-    showToast(`${gcalEvents.length} eventos importados do Google`);
+
+    if (brandNew.length) {
+      showToast(`${brandNew.length} novo${brandNew.length>1?'s':''} evento${brandNew.length>1?'s':''} na agenda`);
+    } else if (gcalEvents.length) {
+      showToast(`Agenda atualizada ✓`);
+    }
   } catch(err) {
     showToast('Erro ao buscar eventos do Google');
     console.error(err);
