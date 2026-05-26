@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0d0d0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -304,6 +304,22 @@ input, textarea { font-family: var(--font); }
   #mobile-home { display: flex; }
   #app { background: var(--bg); }
   .mb-topbar { padding-top: 8px; }
+}
+
+/* ── Safe area (PWA) ── */
+@supports (padding-top: env(safe-area-inset-top)) {
+  @media (max-width: 640px) {
+    #app {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .mb-topbar {
+      padding-top: max(14px, env(safe-area-inset-top));
+    }
+    #bottom-nav {
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+  }
 }
 
 /* ── Transitions ── */
