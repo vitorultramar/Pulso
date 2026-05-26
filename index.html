@@ -47,7 +47,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 input, textarea { font-family: var(--font); }
 
 /* ── Layout ── */
-#app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+#app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
 #topbar { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--bg); gap: 12px; }
 #logo { font-size: 17px; font-weight: 500; letter-spacing: -0.02em; color: var(--accent); transition: color .4s; }
 #content { flex: 1; overflow: hidden; display: flex; }
@@ -297,9 +297,13 @@ input, textarea { font-family: var(--font); }
   #day-view, #week-view, #tasks-view { display: none !important; }
   #briefing { display: none !important; }
   #day-header { display: none !important; }
-  #mobile-home { display: flex; }
   #topbar { display: none; }
   #bottom-nav { display: block; }
+  #content { flex-direction: column; overflow: hidden; }
+  #main { display: none !important; }
+  #mobile-home { display: flex; }
+  #app { background: var(--bg); }
+  .mb-topbar { padding-top: 8px; }
 }
 
 /* ── Transitions ── */
@@ -969,8 +973,15 @@ function mbSetView(v) {
 
 function timeCountdown(dt) {
   const diff = dt - Date.now();
-  if (diff < 0) return 'agora';
+  if (diff < 0) {
+    const ago = Math.abs(diff);
+    const mins = Math.floor(ago / 60000);
+    if (mins < 60) return `há ${mins}min`;
+    const hrs = Math.floor(mins / 60);
+    return `há ${hrs}h`;
+  }
   const mins = Math.floor(diff / 60000);
+  if (mins === 0) return 'agora';
   if (mins < 60) return `em ${mins}min`;
   const hrs = Math.floor(mins / 60);
   const rem = mins % 60;
@@ -1005,7 +1016,12 @@ function renderMobileHome() {
   container.innerHTML = '';
 
   const allEvs = eventsForDay(today).sort((a,b)=>a.date-b.date);
-  const next = allEvs.find(e => e.date > new Date());
+  const now = new Date();
+  // "next" = next upcoming OR currently happening (started within last 30min)
+  const next = allEvs.find(e => {
+    const endTime = new Date(e.date.getTime() + (e.duration||60)*60000);
+    return endTime > now; // still ongoing or upcoming
+  });
   const rest = allEvs.filter(e => e !== next);
 
   if (!allEvs.length) {
@@ -1013,35 +1029,59 @@ function renderMobileHome() {
     return;
   }
 
-  // Next event — big card
+  // Next/current event — big card
   if (next) {
     const isDimmed = (mode==='work'&&next.context==='personal')||(mode==='personal'&&next.context==='work');
+    const isOngoing = next.date <= now;
     const div = document.createElement('div');
     div.className = `mb-card-big ${next.context}${isDimmed?' dimmed':''}`;
     div.innerHTML = `
-      <div class="ctx-label">${next.context==='work'?'trabalho':'pessoal'}</div>
+      <div class="ctx-label">${isOngoing ? '● em andamento' : next.context==='work'?'trabalho':'pessoal'}</div>
       <div class="ev-name">${next.title}</div>
       <div class="ev-footer">
         <div class="ev-time-txt">${fmtTime(next.date)} · ${next.duration}min</div>
-        <div class="ev-pill">${timeCountdown(next.date)}</div>
+        <div class="ev-pill">${isOngoing ? 'agora' : timeCountdown(next.date)}</div>
       </div>`;
     const label = document.createElement('div');
     label.className = 'mb-section-label';
-    label.textContent = 'próximo';
+    label.textContent = isOngoing ? 'agora' : 'próximo';
     container.appendChild(label);
     container.appendChild(div);
   }
 
-  // Rest — small cards
-  if (rest.length) {
+  // Past + future rest — small cards
+  const pastEvs = rest.filter(e => new Date(e.date.getTime() + (e.duration||60)*60000) <= now);
+  const futureEvs = rest.filter(e => new Date(e.date.getTime() + (e.duration||60)*60000) > now);
+
+  if (futureEvs.length) {
     const label = document.createElement('div');
     label.className = 'mb-section-label';
-    label.textContent = next ? 'mais tarde' : 'hoje';
+    label.textContent = 'mais tarde';
     container.appendChild(label);
-    rest.forEach(ev => {
+    futureEvs.forEach(ev => {
       const isDimmed = (mode==='work'&&ev.context==='personal')||(mode==='personal'&&ev.context==='work');
       const div = document.createElement('div');
       div.className = `mb-card-small ${ev.context}${isDimmed?' dimmed':''}`;
+      div.innerHTML = `
+        <div class="cs-body">
+          <div class="cs-name">${ev.title}</div>
+          <div class="cs-meta">${fmtTime(ev.date)}${ev.meta?' · '+ev.meta:''}</div>
+        </div>
+        <div class="cs-countdown">${timeCountdown(ev.date)}</div>`;
+      container.appendChild(div);
+    });
+  }
+
+  if (pastEvs.length) {
+    const label = document.createElement('div');
+    label.className = 'mb-section-label';
+    label.textContent = 'anteriores';
+    container.appendChild(label);
+    pastEvs.forEach(ev => {
+      const isDimmed = (mode==='work'&&ev.context==='personal')||(mode==='personal'&&ev.context==='work');
+      const div = document.createElement('div');
+      div.className = `mb-card-small ${ev.context}${isDimmed?' dimmed':''}`;
+      div.style.opacity = '0.4';
       div.innerHTML = `
         <div class="cs-body">
           <div class="cs-name">${ev.title}</div>
